@@ -67,6 +67,7 @@ agg_df = lead_df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "mea
 agg_df = agg_df.reset_index()
 
 # Görev 5: Age değişkenini kategorik değişkene çeviriniz ve agg_df’e ekleyiniz.
+#bins = [0, 18, 23, 30, 40, agg_df['AGE'].max()]
 agg_df["AGE_CAT"] = pd.cut(x=agg_df["AGE"], bins=[0, 18, 23, 30, 40, 70], labels=['0_18', '19_23', '24_30', '31_40', '41_70'])
 agg_df.head()
 
@@ -83,6 +84,11 @@ customers_level_based.head()
 agg_df = agg_df.join(customers_level_based["customers_level_based"])
 agg_df.head()
 
+# ikinci yöntem
+
+liste = agg_df.drop(['AGE', 'PRICE'], axis=1).values
+agg_df['customers_level_based'.upper()] = ['_'.join(index).upper() for index in liste]
+
 # Görev 7: Yeni müşterileri (personaları) segmentlere ayırınız.
 segment = pd.qcut(agg_df["PRICE"], 4, labels=["D", "C", "B", "A"])
 agg_df["SEGMENT"] = segment
@@ -96,6 +102,14 @@ agg_df[agg_df["customers_level_based"] == new_user].agg({"SEGMENT": "unique",
                                                          "PRICE": "mean"})
 fra_user = "FRA_ANDROID_FEMALE_31_40"
 agg_df[agg_df["customers_level_based"] == fra_user][["PRICE", "SEGMENT"]]
+
+agg_df.iloc[0, 0]
+
+
+
+
+
+
 
 
 
