@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -176,6 +174,23 @@ for col in num_cols:
 for col in num_cols:
     print(col)
     grab_outliers(df, col)
+
+
+clf = LocalOutlierFactor(n_neighbors=20)
+clf.fit_predict(df)
+
+clf_scores = clf.negative_outlier_factor_
+np.sort(clf_scores)[:5]
+
+scores = pd.DataFrame(np.sort(clf_scores))
+scores.plot(stacked=True, xlim=[0, 20], style='.-')
+plt.show()
+
+th = np.sort(clf_scores)[3]
+df[clf_scores < th]
+df[clf_scores < th].shape
+
+
 
 # Adım 6: Eksik gözlem analizi yapınız.
 
