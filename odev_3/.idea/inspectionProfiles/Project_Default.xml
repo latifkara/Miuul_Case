@@ -1,0 +1,55 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="8">
+            <item index="0" class="java.lang.String" itemvalue="pandas" />
+            <item index="1" class="java.lang.String" itemvalue="yacs" />
+            <item index="2" class="java.lang.String" itemvalue="tb-nightly" />
+            <item index="3" class="java.lang.String" itemvalue="gdown" />
+            <item index="4" class="java.lang.String" itemvalue="yapf" />
+            <item index="5" class="java.lang.String" itemvalue="isort" />
+            <item index="6" class="java.lang.String" itemvalue="requests" />
+            <item index="7" class="java.lang.String" itemvalue="flake8" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="W292" />
+          <option value="E302" />
+          <option value="E305" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="Venv.absl" />
+          <option value="test_tools.TestInitiator.*" />
+          <option value="yolo_drone.project_crop_yolo.*" />
+          <option value="utils.*" />
+          <option value="yolo_drone.gpsmap.airsim_gpsflask.flask_cors" />
+          <option value="models.yolo" />
+          <option value="vehicle_control" />
+          <option value="common.python.logger.Queue" />
+          <option value="common.cpp.build.libcommon" />
+          <option value="body_offset" />
+          <option value="examples.simple_goto.enumy" />
+          <option value="keras.layers.normalization.BatchNormalization" />
+          <option value="aoa_demo.counter" />
+          <option value="aoa_demo.p_list" />
+          <option value="aoa_demo.t_list" />
+          <option value="aoa_demo.list_y" />
+          <option value="aoa_demo.list_x" />
+          <option value="aoa_demo.s_time" />
+          <option value="aoa_demo.e_time" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
