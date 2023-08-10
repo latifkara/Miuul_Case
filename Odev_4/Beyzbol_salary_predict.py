@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import scipy.stats as stats
 
 from sklearn.preprocessing import RobustScaler
 from sklearn.linear_model import LinearRegression
@@ -134,8 +135,8 @@ def target_summary_with_num(dataframe, target, numerical_col):
 for col in num_cols:
     target_summary_with_num(df, "Salary", col)
 
-
-
+stats.ttest_1samp(a=df["League"], b=df["NewLeague"])
+df.head()
 def outlier_threshold(dataframe, col_name, q1=0.25, q3=0.75):
     quantile1 = dataframe[col_name].quantile(q1)
     quantile3 = dataframe[col_name].quantile(q3)
@@ -144,8 +145,8 @@ def outlier_threshold(dataframe, col_name, q1=0.25, q3=0.75):
     low_limit = quantile1 - 1.5 * interquantile_range
     return up_limit, low_limit
 
-def check_outliers(dataframe, col_name):
-    up_limit, low_limit = outlier_threshold(dataframe, col_name)
+def check_outliers(dataframe, col_name, q1=0.25, q3=0.75):
+    up_limit, low_limit = outlier_threshold(dataframe, col_name,  q1, q3)
     return dataframe[(dataframe[col_name] < low_limit) | (dataframe[col_name] > up_limit)].any(axis=None)
 
 def grab_outliers(dataframe, col_name, index=False):
@@ -168,6 +169,19 @@ def replace_with_thresholds(dataframe, variable):
 
 for col in num_cols:
     print(col, check_outliers(df, col))
+
+for col in num_cols:
+    sns.boxplot(data=df, x=col)
+    plt.show(block=True)
+
+for col in num_cols:
+    print(col, check_outliers(df, col, 0.1, 0.9))
+
+for col in num_cols:
+    if check_outliers(df, col, 0.1, 0.9):
+        replace_with_thresholds(df, col)
+
+
 
 clf = LocalOutlierFactor(n_neighbors=20)
 clf.fit_predict(df[num_cols].drop('Salary', axis=1))
@@ -203,9 +217,15 @@ def missing_values_table(dataframe, na_name=False):
 
 na_columns = missing_values_table(df, na_name=True)
 
-df.fillna(df.groupby("Division")[na_columns].transform("mean"), inplace=True)
+df.dropna(inplace=True)
 
 df[category_cols].nunique()
+
+
+df.loc[df["HmRun"].max(), 'League']
+df.groupby(["HmRun", "League"]).agg({"Salary": "mean"}).sort_values(by="HmRUn", ascending=False)
+
+
 
 # Label Encoder
 
@@ -232,10 +252,36 @@ def rare_analyser(dataframe, target, cat_cols):
 
 rare_analyser(df, "Salary", category_cols)
 
+## Heatmap
+
+corr = df[num_cols].corr()
+
+sns.set(rc={'figure.figsize': (10, 10)})
+sns.heatmap(corr, cmap='RdBu')
+plt.show()
+
+
+def high_correlated_cols(dataframe, plot=False, corr_th=0.90):
+    num_cols = [col for col in df.columns if df[col].dtype in [int, float]]
+    corr = dataframe[num_cols].corr()
+    corr_matrix = corr.abs()
+    upper_traingle_matrix = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    drop_list = [col for col in upper_traingle_matrix.columns if any(upper_traingle_matrix[col] > corr_th)]
+    if plot:
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        sns.set(rc={'figure.figsize': (10, 10)})
+        sns.heatmap(corr, cmap='RdBu')
+        plt.show()
+
+    return drop_list
+high_correlated_cols(df, plot=True)
+
 ## Özellik mühendisliği (Feature Engineering)
 
 category_cols, num_cols, cat_but_car = grab_col_names(df)
 
+num_cols = [col for col in num_cols if col not in "LStartDate"]
 
 robust = RobustScaler()
 df[num_cols] = robust.fit_transform(df[num_cols])
@@ -243,7 +289,7 @@ df.head()
 
 # Split Data
 
-X = df.drop('Salary', axis=1).values
+X = df.drop(['Salary'], axis=1).values
 y = df[["Salary"]].values
 y.ndim
 
@@ -262,6 +308,9 @@ np.sqrt(mean_squared_error(y, y_pred))
 
 ## MAE
 mean_absolute_error(y, y_pred)
+
+## Score
+reg_model.score(X, y)
 
 ## train and test data
 
@@ -308,29 +357,42 @@ target_summary_with_cat(df, "Salary", "LStartDate")
 
 df.groupby(["Years", "LStartDate"])["Salary"].agg(["mean", "count"]).sort_values("mean", ascending=False)
 
+df.groupby("Years")["CAtBat"].mean()
 
-## Heatmap
-
-corr = df[num_cols].corr()
-
-sns.set(rc={'figure.figsize': (10, 10)})
-sns.heatmap(corr, cmap='RdBu')
-plt.show()
+df["CAtBatPerYears"] = df["CAtBat"] / df["Years"]
+df.shape
 
 
-def high_correlated_cols(dataframe, plot=False, corr_th=0.90):
-    num_cols = [col for col in df.columns if df[col].dtype in [int, float]]
-    corr = dataframe[num_cols].corr()
-    corr_matrix = corr.abs()
-    upper_traingle_matrix = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-    drop_list = [col for col in upper_traingle_matrix.columns if any(upper_traingle_matrix[col] > corr_th)]
-    if plot:
-        import seaborn as sns
-        import matplotlib.pyplot as plt
-        sns.set(rc={'figure.figsize': (10, 10)})
-        sns.heatmap(corr, cmap='RdBu')
-        plt.show()
 
-    return drop_list
+num_cols = [col for col in num_cols if col not in "LStartDate"]
 
-high_correlated_cols(df, plot=True)
+robust = RobustScaler()
+df[num_cols] = robust.fit_transform(df[num_cols])
+df.head()
+
+X = df.drop(['Salary', 'LStartDate'], axis=1).values
+y = df[["Salary"]].values
+
+missing_values_table(df)
+
+df["CAtBatPerYears"].fillna(df["CAtBatPerYears"].mean())
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=1)
+
+reg_model = LinearRegression()
+reg_model.fit(X_train, y_train)
+
+y_pred = reg_model.predict(X_test)
+
+reg_model.score(X_train, y_train)
+
+mean_squared_error(y_test, y_pred)
+
+np.sqrt(mean_squared_error(y_test, y_pred))
+
+np.mean(np.sqrt(-cross_val_score(reg_model, X, y, cv=10, scoring="neg_mean_squared_error")))
+
+
+
+
+
